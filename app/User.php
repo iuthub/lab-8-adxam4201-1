@@ -1,39 +1,53 @@
-<?php
+<?php namespace App;
 
-namespace App;
+use Illuminate\Session\Store;
 
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-
-class User extends Authenticatable
+class Post
 {
-    use Notifiable;
+    private $session;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name', 'email', 'password',
-    ];
+    public function __construct(Store $session)
+    {
+        $this->session = $session;
+        $this->createDummyData();
+    }
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+    public function getPosts()
+    {
+        return $this->session->get('posts');
+    }
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function getPost($id)
+    {
+        return $this->session->get('posts')[$id];
+    }
+
+    public function addPost($title, $content)
+    {
+        $posts = $this->session->get('posts');
+        array_push($posts, ['title' => $title, 'content' => $content]);
+        $this->session->put('posts', $posts);
+    }
+
+    public function editPost($id, $title, $content)
+    {
+        $posts = $this->session->get('posts');
+        $posts [$id] = ['title' => $title, 'content' => $content];
+        $this->session->put('posts', $posts);
+    }
+
+    private function createDummyData()
+    {
+        $posts = [
+            [
+                'title' => 'Learning Laravel',
+                'content' => 'This blog post will get you right on track with Laravel !'
+            ],
+            [
+                'title' => 'Something else',
+                'content' => 'Some other content'
+            ]
+        ];
+        $this->session->put('posts', $posts);
+    }
 }
